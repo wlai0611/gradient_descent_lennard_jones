@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from functions import gradient_descent,get_gradients,coordinates_to_potential_sum,SimulationHelper
-
+import matplotlib.animation as anm
 
 class LinReg():
 
@@ -21,7 +21,8 @@ true_intercept = 7
 y = true_slope*x + true_intercept + rng.random(n)
 regressor = LinReg(x, y)
 starting_params = [2,1]
-m,b = gradient_descent(regressor.chi_sq, starting_params, step_len=0.5)
+steps, fxs = gradient_descent(regressor.chi_sq, starting_params, step_len=0.5)
+m, b  = steps[-1]
 print(f'Expected m:{true_slope} b:{true_intercept}, Observed m:{m} b:{b}')
 
 coordinates = np.array([
@@ -35,18 +36,38 @@ true_potential_sum = -2.8257776083489956e-06
 simulator = SimulationHelper(coordinates.reshape(3,3))
 print("OpenMM Potential",simulator.potential_function(coordinates.reshape(3,3)))
 
+'''
+starting_params = np.array([
+    [0,0.01,0],
+    [-0.1,0,0],
+    [0.1,0,0]
+]).flatten()
+'''
 
-starting_params = rng.random(9)
 
 def potential_wrapper(coordinates):
     return simulator.potential_function(coordinates.reshape((len(coordinates)//3,3)))
     
 
-min_coordinates = gradient_descent(potential_wrapper, starting_params, step_len=0.01, max_iter=1000)
-min_coordinates = min_coordinates.reshape(len(min_coordinates)//3,3)
-starting_params = starting_params.reshape(len(starting_params)//3,3)
+steps, fxs = gradient_descent(potential_wrapper, starting_params, step_len=0.01, max_iter=100, tolerance=3)
+steps = np.array(steps)
+nsteps, nparams = steps.shape
+steps = steps.reshape(nsteps, nparams//3, 3)
 
-fig = plt.figure()
-ax = plt.axes(projection='3d')
-ax.scatter3D(*min_coordinates.T)
+#https://stackoverflow.com/questions/41602588/how-to-create-3d-scatter-animations
+fig    = plt.figure()
+ax     = plt.axes(projection='3d')
+ax.view_init(elev=166, azim=-144, roll=-20)
+ax.set(xlim=(-2,2), ylim=(-2,2), zlim=(-2,2))
+atoms, = ax.plot(*steps[0].T,linestyle='',marker='o')
+
+def animate(frame_number):
+    coordinates = steps[frame_number]
+    atoms.set_data(coordinates[:,0], coordinates[:,1])
+    atoms.set_3d_properties(coordinates[:,2])
+    return atoms,
+
+anim = anm.FuncAnimation(fig, animate, len(steps), blit=True)
 plt.show()
+
+print()

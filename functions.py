@@ -16,20 +16,26 @@ def get_gradients(func, parameters, perturb=0.0001):
         gradients[param_number]  =  (func(forward_perturb) - func(backward_perturb))/(2*perturb)
     return gradients
 
-def gradient_descent(func, starting_params, max_iter=100, step_len=0.1):
+def gradient_descent(func, starting_params, max_iter=100, step_len=0.1, tolerance=3):
     fx      = func(starting_params)
     counter = 0
     params  = starting_params.copy()
-    while fx > step_len and counter < max_iter:
+    steps   = []
+    steps.append(starting_params)
+    fxs     = []
+    fxs.append(fx)
+    while abs(fx) > tolerance and counter < max_iter:
         gradients            = get_gradients(func, params)
         normalized_gradients = gradients/np.sqrt(np.sum(gradients**2))
         step_direction = normalized_gradients
         step_vector    = step_len * step_direction
         params         = params - step_vector
         fx = func(params)
+        steps.append(params)
+        fxs.append(fx)
         counter += 1
 
-    return params
+    return steps, fxs
 
 def coordinates_to_potential_sum(coordinates, func = lambda r:4*(r**-12-r**-6)):
     potential_sum = 0
