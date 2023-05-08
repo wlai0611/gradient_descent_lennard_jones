@@ -36,20 +36,19 @@ true_potential_sum = -2.8257776083489956e-06
 simulator = SimulationHelper(coordinates.reshape(3,3))
 print("OpenMM Potential",simulator.potential_function(coordinates.reshape(3,3)))
 
-'''
+
 starting_params = np.array([
     [0,0.01,0],
     [-0.1,0,0],
     [0.1,0,0]
 ]).flatten()
-'''
 
 
 def potential_wrapper(coordinates):
     return simulator.potential_function(coordinates.reshape((len(coordinates)//3,3)))
     
 
-steps, fxs = gradient_descent(potential_wrapper, starting_params, step_len=0.01, max_iter=100, tolerance=3)
+steps, fxs = gradient_descent(potential_wrapper, starting_params, step_len=0.01, max_iter=200, tolerance=0.01)
 steps = np.array(steps)
 nsteps, nparams = steps.shape
 steps = steps.reshape(nsteps, nparams//3, 3)
@@ -57,8 +56,8 @@ steps = steps.reshape(nsteps, nparams//3, 3)
 #https://stackoverflow.com/questions/41602588/how-to-create-3d-scatter-animations
 fig    = plt.figure()
 ax     = plt.axes(projection='3d')
-ax.view_init(elev=166, azim=-144, roll=-20)
-ax.set(xlim=(-2,2), ylim=(-2,2), zlim=(-2,2))
+ax.view_init(elev=-119, azim=-146, roll=-20)
+ax.set(xlim=(-1,1), ylim=(-1,1), zlim=(-1,1))
 atoms, = ax.plot(*steps[0].T,linestyle='',marker='o')
 
 def animate(frame_number):
