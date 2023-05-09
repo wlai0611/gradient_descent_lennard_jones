@@ -3,6 +3,9 @@ import matplotlib.pyplot as plt
 from functions import gradient_descent,get_gradients,coordinates_to_potential_sum,SimulationHelper
 import matplotlib.animation as anm
 
+plt.rcParams['animation.ffmpeg_path'] = 'C:\\FFmpeg\\bin\\ffmpeg.exe'
+plt.rcParams['animation.convert_path'] = 'C:\\Program Files\\ImageMagick-7.1.0-Q16-HDRI\\magick.exe'
+
 class LinReg():
 
     def __init__(self, x, y):
@@ -93,7 +96,7 @@ def animate(frame_number):
     return atoms,
 
 anim = anm.FuncAnimation(fig, animate, len(steps), blit=True)
-plt.show()
+anim.save("three_dimensional_gradient_descent.gif",writer="imagemagick")
 
 print()
 
